@@ -1,7 +1,22 @@
 import {Router, Request, Response} from 'express';
+import {NextFunction} from 'express-serve-static-core';
 
 interface RequestWithBody extends Request {
 	body: {[key: string]: string | undefined};
+}
+
+function requireAuth(
+	request: Request,
+	response: Response,
+	next: NextFunction
+): void {
+	console.log(request.session);
+	if (request.session && request.session.loggedIn) {
+		next();
+		return;
+	}
+	response.status(403);
+	response.send('Not permitted.');
 }
 
 const router = Router();
@@ -29,7 +44,7 @@ router.post('/login', (request: RequestWithBody, response: Response) => {
 		password &&
 		(email === 'email@test.com' && password === 'password')
 	) {
-		request.session = {logginIn: true};
+		request.session = {loggedIn: true};
 		response.redirect('/');
 	} else {
 		response.send('Invalid email or password.');
@@ -37,7 +52,7 @@ router.post('/login', (request: RequestWithBody, response: Response) => {
 });
 
 router.get('/', (request: Request, response: Response) => {
-	if (request.session && request.session.logginIn) {
+	if (request.session && request.session.loggedIn) {
 		response.send(`
 			<div>
 				<div>You are logged in.</div>
@@ -53,4 +68,18 @@ router.get('/', (request: Request, response: Response) => {
 		`);
 	}
 });
+
+router.get('/logout', (request: Request, response: Response) => {
+	request.session = undefined;
+	response.redirect('/');
+});
+
+router.get(
+	'/protected',
+	requireAuth,
+	(request: Request, response: Response) => {
+		response.send('Welcome to protected route, loggin in User.');
+	}
+);
+
 export {router};

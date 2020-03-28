@@ -16,4 +16,4 @@ app.use(loginRoutes_1.router);
 app.get('/', function (request, response) {
     response.send("\n\t\t<div>\n\t\t\t<h1>Hi There!</h1>\n\t\t</div>\n\t");
 });
-app.listen(3000, function () { return console.log('Listening on port 3000.'); });
+app.listen(3001, function () { return console.log('Listening on port 3001.'); });
